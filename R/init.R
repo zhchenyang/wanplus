@@ -4,12 +4,6 @@ library(httr)
 library(rvest)
 library(RCurl)
 
-test <- function(nodes, webs = web) {
-  content(webs) %>% 
-    html_nodes(nodes) %>% 
-    html_text(trim = TRUE)
-}
-
 make_event_url <- function(type = 0, year = 2021) {
   # para type 0:全部 1:正在进行 2:即将开始 3: 已经结束
   # year 从 2014 开始
