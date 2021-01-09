@@ -55,6 +55,8 @@ get_all_event <- function(event_url) {
     
     out[[i]] <- res
     
+    Sys.sleep(1)
+    
   }
   
   purrr::reduce(out, rbind)
