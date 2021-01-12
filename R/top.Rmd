@@ -1,0 +1,84 @@
+---
+title: "player"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+df <- rio::import("data/players_fix.csv")
+```
+
+## TOP
+
+```{r}
+top <- df %>% 
+  filter(meta == 1)
+
+# 选手总场次
+changci <- fct_count(as.character(top$playername)) %>% 
+  arrange(desc(n))
+
+changci
+
+# 去除场次低于 30 的选手
+discard <- changci %>% 
+  filter(n < 30) %>% 
+  pull(1) %>% 
+  as.character()
+
+top <- top %>% 
+  filter(!(playername %in% discard))
+
+# 胜率
+top %>% 
+  group_by(playername) %>% 
+  summarise(`胜率` = mean(result)) %>% 
+  arrange(desc(胜率))
+
+# fb
+top %>% 
+  group_by(playername) %>% 
+  summarise(`首杀率` = mean(firstBloodKill, na.rm = TRUE)) %>% 
+  arrange(desc(首杀率))
+
+# 各位置拿一血率
+
+df %>% 
+  group_by(meta) %>% 
+  summarise(`首杀率` = mean(firstBloodKill, na.rm = TRUE)) %>% 
+  arrange(meta)
+
+# 对应队伍
+df %>% 
+  group_by(matchid, teamid) %>% 
+  summarise(`团队一血` = any(firstBloodKill)) %>% 
+  right_join(top) %>% 
+  group_by(playername) %>% 
+  summarise(
+    `个人一血` = mean(firstBloodKill, na.rm = TRUE),
+    `团队一血` = mean(`团队一血`, na.rm = TRUE)) %>% 
+  mutate(`加权一血率` = `个人一血` / `团队一血`) %>% 
+  arrange(desc(加权一血率))
+  
+# 一塔
+top %>% 
+  group_by(playername) %>% 
+  summarise(`一塔率` = mean(firstTowerKill, na.rm = TRUE)) %>% 
+  arrange(desc(一塔率))
+
+# 一塔
+
+df %>% 
+  group_by(meta) %>% 
+  summarise(`一塔率` = mean(firstTowerKill, na.rm = TRUE)) %>% 
+  arrange(meta)
+```
+
+```{r}
+fct_count(top$heroname) %>% 
+  arrange(desc(n))
+fct_count(as.character(top$heroid)) %>% 
+  arrange(desc(n))
+```
+
